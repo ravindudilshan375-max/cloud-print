@@ -5,34 +5,26 @@ app.use(express.json());
 
 let jobs = [];
 
-// Send print job
+// Add print job
 app.post("/print", (req, res) => {
-  const job = {
-    id: Date.now(),
-    data: req.body,
-    status: "pending"
-  };
-  jobs.push(job);
+  jobs.push(req.body);
+  console.log("📥 New job:", req.body);
+
   res.json({ success: true });
 });
 
-// Get jobs
+// Get all jobs (for bridge)
 app.get("/jobs", (req, res) => {
-  res.json(jobs.filter(j => j.status === "pending"));
+  const pending = [...jobs];
+  jobs = []; // clear after sending
+
+  res.json(pending);
 });
 
-// Mark done
-app.post("/done/:id", (req, res) => {
-  const id = Number(req.params.id);
-  jobs = jobs.map(j =>
-    j.id === id ? { ...j, status: "done" } : j
-  );
-  res.json({ success: true });
-});
-
+// Health check
 app.get("/", (req, res) => {
-  res.send("Cloud Print API Running 🚀");
+  res.send("🚀 Cloud Print Running");
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("Server running"));
+app.listen(PORT, () => console.log("Server running on", PORT));
